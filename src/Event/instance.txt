@@ -1,0 +1,156 @@
+系统消息
+{
+  s: 0,
+  d: {
+    channel_type: 'PERSON',
+    type: 255,
+    target_id: '1756250903',
+    author_id: '1',
+    content: '[系统消息]',
+    extra: { type: 'guild_member_offline', body: [Object] },
+    msg_id: '530961fe-345e-43aa-84cf-840350989d2c',
+    msg_timestamp: 1737025860478,
+    nonce: '',
+    from_type: 1
+  },
+  extra: {
+    verifyToken: 'sOIgu4P9z7w77-GM',
+    encryptKey: '',
+    callbackUrl: '',
+    intent: -1
+  },
+  sn: 3
+}
+{
+  s: 0,
+  d: {
+    channel_type: 'PERSON',
+    type: 255,
+    target_id: '1756250903',
+    author_id: '1',
+    content: '[系统消息]',
+    extra: { type: 'guild_member_offline', body: [Object] },
+    msg_id: '9d5834ae-43bc-4165-b690-9147e4129efd',
+    msg_timestamp: 1737025860487,
+    nonce: '',
+    from_type: 1
+  },
+  extra: {
+    verifyToken: 'sOIgu4P9z7w77-GM',
+    encryptKey: '',
+    callbackUrl: '',
+    intent: -1
+  },
+  sn: 4
+}
+{
+  s: 0,
+  d: {
+    channel_type: 'PERSON',
+    type: 255,
+    target_id: '1756250903',
+    author_id: '1',
+    content: '[系统消息]',
+    extra: { type: 'guild_member_offline', body: [Object] },
+    msg_id: '19481ea5-1036-4c6c-9ea3-4a3c6f3668db',
+    msg_timestamp: 1737025860505,
+    nonce: '',
+    from_type: 1
+  },
+  extra: {
+    verifyToken: 'sOIgu4P9z7w77-GM',
+    encryptKey: '',
+    callbackUrl: '',
+    intent: -1
+  },
+  sn: 5
+}
+
+
+频道消息
+{
+  s: 0,
+  d: {
+    channel_type: 'GROUP',
+    type: 9,
+    target_id: '9153364959456846',
+    author_id: '2326284695',
+    content: 'ss',
+    extra: {
+      type: 9,
+      code: '',
+      guild_id: '8391966259259887',
+      guild_type: 0,
+      channel_name: '文字频道',
+      author: [Object],
+      visible_only: '',
+      mention: [],
+      mention_all: false,
+      mention_roles: [],
+      mention_here: false,
+      nav_channels: [],
+      kmarkdown: [Object],
+      emoji: [],
+      preview_content: '',
+      channel_type: 1,
+      last_msg_content: 'dabyss zirawa_sevethri：ss',
+      send_msg_device: 0
+    },
+    msg_id: '2c96a123-a847-4cb2-af6d-8d9606355651',
+    msg_timestamp: 1737024925686,
+    nonce: 'i5OSv7fYjB9BGMAOAzRxNW8m',
+    from_type: 1
+  },
+  extra: {
+    verifyToken: 'sOIgu4P9z7w77-GM',
+    encryptKey: '',
+    callbackUrl: '',
+    intent: -1
+  },
+  sn: 2
+}
+
+
+私聊
+{
+  s: 0,
+  d: {
+    channel_type: 'PERSON',
+    type: 9,
+    target_id: '1756250903',
+    author_id: '2326284695',
+    content: 'ssa',
+    extra: {
+      type: 9,
+      code: '14894ce0dd6794fed3ef952e8641eef8',
+      author: [Object],
+      visible_only: '',
+      mention: [],
+      mention_all: false,
+      mention_roles: [],
+      mention_here: false,
+      nav_channels: [],
+      kmarkdown: [Object],
+      emoji: [],
+      preview_content: '',
+      last_msg_content: 'ssa',
+      send_msg_device: 0
+    },
+    msg_id: 'f240a5a1-ee64-4a9f-8ac6-0b70904a0cff',
+    },
+    msg_id: 'f240a5a1-ee64-4a9f-8ac6-0b70904a0cff',
+    msg_id: 'f240a5a1-ee64-4a9f-8ac6-0b70904a0cff',
+    msg_timestamp: 1737024803408,
+    nonce: '35pAGcs2v6VbODUdHPhzXUel',
+    nonce: '35pAGcs2v6VbODUdHPhzXUel',
+    from_type: 1
+    from_type: 1
+  },
+  extra: {
+    verifyToken: 'sOIgu4P9z7w77-GM',
+    encryptKey: '',
+    callbackUrl: '',
+    intent: -1
+  },
+  sn: 1
+}

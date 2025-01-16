@@ -1,4 +1,5 @@
 import { JObject } from "@zwa73/utils";
+import { AnyEventData } from "@/src/Event";
 
 /**方向： server->client
  * 说明： 当我们成功连接 websocket 后，客户端应该在 6s 内收到该包，否则认为连接超时。
@@ -33,7 +34,7 @@ export type SignalingHello = {
  */
 export type SignalingEvent = {
     s: 0;
-    d: JObject;
+    d: AnyEventData;
     sn:number;
 };
 

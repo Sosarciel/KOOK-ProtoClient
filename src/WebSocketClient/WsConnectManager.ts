@@ -57,10 +57,12 @@ type Status = typeof Status[number];
 
 
 type ClientConnectEvent = {
-    /**成功建立链接时的事件 */
-    onconnect:(ws?:WebSocket)=>void|Promise<void>;
-    /**链接重置 / 触发sn清空 时的事件 */
-    onreset:((ws?:WebSocket)=>void|Promise<void>);
+    /**接收消息时的事件 */
+    onmessage:(data:AnySignaling)=>void|Promise<void>;
+    /**链接重置 / 触发sn清空 时的事件  
+     * 将会自动重置内部sn
+     */
+    onreset:(()=>void|Promise<void>);
     /**ws被销毁时的事件 */
     onclose:(()=>void|Promise<void>);
 }
@@ -70,26 +72,28 @@ export class WsConnectManager{
     cce:ClientConnectEvent;
     constructor(
         private token: string,
-        clientConnectEvent:ClientConnectEvent,
+        clientConnectEvent?:Partial<ClientConnectEvent>,
     ) {
+        clientConnectEvent ??= {};
         const client = this;
         this.cce = {
-            async onconnect (){
-                await clientConnectEvent.onconnect(client.ws);
+            async onmessage (data){
+                if(clientConnectEvent.onmessage)
+                    await clientConnectEvent.onmessage(data);
             },
             async onreset(){
-                await clientConnectEvent.onreset(client.ws);
+                if(clientConnectEvent.onreset)
+                    await clientConnectEvent.onreset();
                 client.lastsn = 0;
             },
             async onclose(){
-                await clientConnectEvent.onclose();
+                if(clientConnectEvent.onclose)
+                    await clientConnectEvent.onclose();
                 client.ws?.close();
-                client.connected = false;
             }
         };
     }
 
-    private connected = false;
     private currStatus:Status = "GetGateway";
     lastsn=0;
     private ws?:WebSocket;
@@ -110,8 +114,13 @@ export class WsConnectManager{
 
     async start(){
         while(true){
-            if(this.currStatus == "Terminate") break;
-            this.currStatus = await this.procStatus();
+            try{
+                if(this.currStatus == "Terminate") break;
+                this.currStatus = await this.procStatus();
+            }catch(e){
+                SLogger.error(`WsConnectManager.start 处理状态时发生错误 ${e}`,'重置为 GetGateway');
+                this.currStatus = "GetGateway";
+            }
         }
     }
 
@@ -182,33 +191,28 @@ export class WsConnectManager{
     }
     async tryConnect(){
         SLogger.info(`正在连接网关`);
-
         const ws = this.ws;
         if(ws==null) return Failed;
 
-        let openRes:((v:Success)=>void)|null = null;
-        let errRes :((v:Failed )=>void)|null = null;
-        const openPromise = new Promise<Success>((resolve, reject) => {
-            openRes = resolve;
-        });
-        const errPromise = new Promise<Failed>((resolve, reject) => {
-            errRes = resolve;
-        });
-        const onOpen = ()=>{
-            if(openRes) openRes(Success);
+        let openRes:((v:Success)=>void) = ()=>undefined;
+        let errRes :((v:Failed )=>void) = ()=>undefined;
+        const onOpen = (resolve:(v:Success)=>void)=>{
             ws.off('error', onError);
+            openRes(Success);
         }
-        const onError = ()=>{
-            if(errRes) errRes(Failed);
+        const onError = (reslove:(v:Failed )=>void)=>{
             ws.off('open', onOpen);
+            errRes(Failed);
         }
-
-        ws.once('open', onOpen);
-        ws.once('error', onError);
-
         return await Promise.race([
-            openPromise,
-            errPromise,
+            new Promise<Success>((resolve, reject) => {
+                openRes = resolve;
+                ws.once('open', onOpen);
+            }),
+            new Promise<Failed>((resolve, reject) => {
+                errRes = resolve;
+                ws.once('error', onError);
+            })
         ]);
     }
     //#endregion
@@ -228,7 +232,6 @@ export class WsConnectManager{
 
         await this.cce.onclose();
         this.ws = new WebSocket(reconnectUrl);
-        this.connected = false;
 
         const result = await seqRepeatify([8,16],
             this.tryConnect.bind(this),
@@ -320,10 +323,6 @@ export class WsConnectManager{
     async ProcHeartbeat():Promise<Status>{
         const { ws } = this;
         if(ws==null) return "GetGateway";
-        if(!this.connected){
-            await this.cce.onconnect();
-            this.connected = true;
-        }
 
         const result = await this.heartbeat();
         return UtilFunc.matchProc(result, {
@@ -342,7 +341,7 @@ export class WsConnectManager{
         });
     }
     async heartbeat(){
-        SLogger.info(`正在检查心跳`);
+        SLogger.info(`正在维持心跳`);
         let bkres:((v:Failed|Timeout|Terminated)=>void)|null= null;
         const bkpromis = new Promise<Failed|Timeout|Terminated>((reslove,reject)=>bkres = reslove);
 
@@ -359,7 +358,7 @@ export class WsConnectManager{
                     if(bkres) bkres(Timeout);
                 },
                 [Success](){
-                    SLogger.info(`检查心跳完成`);
+                    SLogger.verbose(`检查心跳完成`);
                 },
                 [Failed](){
                     SLogger.warn(`检查心跳失败 ws不存在 可能是代码错误`);
@@ -372,7 +371,7 @@ export class WsConnectManager{
             })
         },30000);
 
-        const recordsn = (data:Buffer)=>{
+        const updateEvent = async (data:Buffer)=>{
             try{
                 const strdata = data.toString();
                 const jsonData = JSON.parse(strdata) as AnySignaling;
@@ -387,16 +386,18 @@ export class WsConnectManager{
                     SLogger.warn(`触发重连 code:${jsonData.d.code}`);
                     if(bkres) bkres(Terminated);
                 }
+                await this.cce.onmessage(jsonData);
             }catch(e){}
         }
-        this.ws?.on('message',recordsn);
+        this.ws?.on('message',updateEvent);
         const result = await bkpromis;
         clearInterval(this.heartbeatEvent);
-        this.ws?.off('message',recordsn);
+        this.ws?.off('message',updateEvent);
         this.heartbeatEvent = undefined;
         return result;
     }
     async checkHeartbeat(){
+        SLogger.verbose(`尝试检查心跳`);
         const ws = this.ws;
         if(ws==null) return Failed;
         const hb:SignalingPing = {
