@@ -43,16 +43,7 @@ export type EventBaseData = {
     nonce:string;
 }
 
-export type TextChannelsEventData = Omit<EventBaseData,'type'> & {
-    /**1:文字消息  
-     * 2:图片消息  
-     * 3:视频消息  
-     * 4:文件消息  
-     * 8:音频消息  
-     * 9:KMarkdown  
-     * 10:card 消息  
-     */
-    type:1|2|3|4|8|9|10;
+export type TextChannelsEventData = EventBaseData & {
     extra:{
         /**1:文字消息  
          * 2:图片消息  
@@ -79,9 +70,8 @@ export type TextChannelsEventData = Omit<EventBaseData,'type'> & {
         author:UserObject;
     }
 }
-export type SystemMessageEventData = Omit<EventBaseData,'type'> & {
-    /**255:系统消息 */
-    type:255;
+
+export type SystemMessageEventData = EventBaseData & {
     extra:{
         /**255:系统消息 */
         type:255;

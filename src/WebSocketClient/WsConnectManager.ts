@@ -1,9 +1,8 @@
-import { Failed, sleep, SLogger, Success, Terminated, Timeout, UtilFunc } from "@zwa73/utils";
+import { Failed, sleep, SLogger, Success, Terminated, Timeout, UtilCom, UtilFunc } from "@zwa73/utils";
 import { AnySignaling, SignalingPing } from "./Signaling";
 import { WebSocket } from "ws";
 import { BaseUrl, getAuthorization } from "@/src/Define";
 import { Endpoint } from "@/src/Endpoint";
-import { httpsGet } from "./Utils";
 import { GatewayResp } from "@/src/Resp";
 import qs from 'querystring';
 
@@ -152,9 +151,9 @@ export class WsConnectManager{
                 Authorization: getAuthorization("Bot", this.token),
             },
         };
-        const result = (await httpsGet(opt, {
+        const result = (await UtilCom.httpsGet({
             compress:0,
-        }))?.body as GatewayResp;
+        },opt))?.data as GatewayResp;
         //console.log(result);
         return result.data.url;
     }
