@@ -17,8 +17,9 @@ export type UploadMediaRespData = RespData<{
     url:string;
 }>;
 
+
 /**发送私聊消息的请求数据 */
-export type PrivateMessageReqData = {
+export type SendPrivateMessageReqData = {
     /**消息类型
      * 不传默认为 1  
      * 1:文字消息  
@@ -29,7 +30,7 @@ export type PrivateMessageReqData = {
      * 9:KMarkdown  
      * 10:card 消息  
      */
-    type: MessageType;
+    type?: MessageType;
     /**目标用户 id, 后端会自动创建会话  
      * 有此参数之后可不传 chat_code参数
      */
@@ -50,11 +51,49 @@ export type PrivateMessageReqData = {
     template_id:string;
 }
 /**发送私聊消息的响应数据 */
-export type PrivateMessageRespData = RespData<{
+export type SendPrivateMessageRespData = RespData<{
     /**服务端生成的消息 id */
     msg_id: string;
     /**消息发送时间(服务器时间戳) */
     msg_timestamp: number;
     /**随机字符串，见参数列表 */
+    nonce: string;
+}>
+
+
+/**发送频道消息的请求数据 */
+export type SendGroupMessageReqData = {
+    /**消息类型
+     * 不传默认为 1  
+     * 1:文字消息  
+     * 2:图片消息  
+     * 3:视频消息  
+     * 4:文件消息  
+     * 8:音频消息  
+     * 9:KMarkdown  
+     * 10:card 消息  
+     */
+    type?: MessageType;
+    /** 目标频道 id */
+    target_id: string;
+    /** 消息内容 */
+    content: string;
+    /** 回复某条消息的 msgId */
+    quote?: string;
+    /** nonce, 服务端不做处理, 原样返回 */
+    nonce?: string;
+    /** 用户 id, 代表该消息是临时消息，不存数据库，只为该用户推送临时消息 */
+    temp_target_id?: string;
+    /** 模板消息 id, 使用时 content 作为模板消息的 input */
+    template_id?: string;
+};
+
+/**发送频道消息的响应数据 */
+export type SendGroupMessageRespData = RespData<{
+    /** 服务端生成的消息 id */
+    msg_id: string;
+    /** 消息发送时间(服务器时间戳) */
+    msg_timestamp: number;
+    /** 随机字符串，见参数列表 */
     nonce: string;
 }>
