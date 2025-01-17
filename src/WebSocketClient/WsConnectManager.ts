@@ -1,13 +1,11 @@
 import { Failed, sleep, SLogger, Success, Terminated, Timeout, UtilCom, UtilFunc } from "@zwa73/utils";
 import { AnySignaling, SignalingPing } from "./Signaling";
 import { WebSocket } from "ws";
-import { BaseUrl, getAuthorization } from "@/src/Define";
-import { Endpoint } from "@/src/Endpoint";
+import { KookBaseUrl, getAuthorization } from "@/src/Define";
+import { Endpoint, EndpointBuilder } from "@/src/Endpoint";
 import { GatewayResp } from "@/src/Resp";
 import qs from 'querystring';
 
-
-const endpoint = Endpoint.buildEndpoint(3);
 const expMaxTime = 60;
 
 /**以2为指数重试  
@@ -142,9 +140,9 @@ export class WsConnectManager{
     async getGateway() {
         SLogger.info(`正在获取网关`);
         const opt = {
-            hostname: BaseUrl,
+            hostname: KookBaseUrl,
             port: 443,
-            path: endpoint.Gateway,
+            path: Endpoint.Gateway,
             method: "GET" as const,
             headers: {
                 "Content-Type": "application/json",
