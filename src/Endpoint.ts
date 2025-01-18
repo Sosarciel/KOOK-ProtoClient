@@ -1,36 +1,49 @@
 
 
 
+
+const formatBuilder =
+    <PRE extends string>(pre:PRE)=>
+        <PTH extends string>(pth:PTH)=>
+            `${pre}/${pth}` as const;
+
 export class EndpointBuilder<T extends 3> {
     constructor(private version:T){}
     buildEndpoint(){
-        const format = <T extends string>(basepath:T)=>
+        const f = <T extends string>(basepath:T)=>
             `/api/v${this.version}/${basepath}` as const;
         return {
             /**获取网关 */
-            Gateway:format('gateway/index'),
+            Gateway:f('gateway/index'),
             /**上传媒体文件 */
-            UploadMedia:format('asset/create'),
-            PrivateMessage:this.buildPrivateMessage('direct-message'),
-            GroupMessage:this.buildGroupMessage('message'),
+            UploadMedia:f('asset/create'),
+            PrivateMessage:this.buildPrivateMessage(f('direct-message')),
+            GroupMessage:this.buildGroupMessage(f('message')),
+            User:this.buildUser(f('user')),
         }
     }
 
     private buildPrivateMessage<P extends string>(pre:P){
-        const format = <T extends string>(p:T)=>
-            `${pre}/${p}` as const;
+        const f = formatBuilder(pre);
 
         return {
-            Create:format('create'),
+            Create:f('create'),
         }
     }
 
     private buildGroupMessage<P extends string>(pre:P){
-        const format = <T extends string>(p:T)=>
-            `${pre}/${p}` as const;
+        const f = formatBuilder(pre);
 
         return {
-            Create:format('create'),
+            Create:f('create'),
+        }
+    }
+
+    private buildUser<P extends string>(pre:P){
+        const f = formatBuilder(pre);
+
+        return {
+            Me:f('me'),
         }
     }
 }

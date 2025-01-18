@@ -138,6 +138,7 @@ export class WsConnectManager{
         return "ConnectGateway";
     }
     async getGateway() {
+        await sleep(1000);
         SLogger.info(`正在获取网关`);
         const opt = {
             hostname: KookBaseUrl,
@@ -149,9 +150,10 @@ export class WsConnectManager{
                 Authorization: getAuthorization("Bot", this.token),
             },
         };
-        const result = (await UtilCom.httpsGet({
+        console.log(opt.path)
+        const result = (await UtilCom.httpsGet(opt,{
             compress:0,
-        },opt))?.data as GatewayResp;
+        }))?.data as GatewayResp;
         //console.log(result);
         return result.data.url;
     }

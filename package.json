@@ -9,7 +9,7 @@
   "author": "zwa73",
   "license": "ISC",
   "dependencies": {
-    "@zwa73/utils": "^1.0.173",
+    "@zwa73/utils": "^1.0.182",
     "form-data": "^4.0.1",
     "querystring": "^0.2.1",
     "ws": "^8.18.0"

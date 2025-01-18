@@ -1,6 +1,6 @@
-import { JObject, UtilCom } from "@zwa73/utils";
+import { GetReqData, JObject, UtilCom } from "@zwa73/utils";
 import { postFormData } from "./Common";
-import { KookBaseUrl } from "../Define";
+import { getAuthorization, KookBaseUrl } from "../Define";
 import { SendGroupMessageReqData, SendPrivateMessageReqData, SendPrivateMessageRespData, UploadMediaRespData } from "./RequestInterface";
 import { Endpoint } from "../Endpoint";
 
@@ -9,19 +9,19 @@ import { Endpoint } from "../Endpoint";
 export class KookAPISender{
     constructor(private token:string){}
 
-    private async postapi(obj:JObject,url:string){
-        return UtilCom.httpsPost(obj,{
+    private async postapi(url:string,obj?:JObject){
+        return UtilCom.httpsPost({
             hostname:KookBaseUrl,
-            path:url,
             port:443,
+            path:url,
             headers:{
                 "Content-Type":"application/json",
-                "Authorization":`Bearer ${this.token}`,
+                "Authorization":getAuthorization('Bot',this.token),
             }
-        });
+        },obj);
     }
-    private async getapi(obj:Record<string,string|number|boolean>,url:string){
-        return UtilCom.httpsGet(obj,{
+    private async getapi(url:string,obj?:GetReqData){
+        return UtilCom.httpsGet({
             hostname:KookBaseUrl,
             path:url,
             port:443,
@@ -29,7 +29,7 @@ export class KookAPISender{
                 "Content-Type":"application/json",
                 "Authorization":`Bearer ${this.token}`,
             }
-        });
+        },obj);
     }
 
     /**上传媒体文件 */
@@ -40,12 +40,19 @@ export class KookAPISender{
 
     /**发送私聊消息 */
     async sendPrivateMsg(data:SendPrivateMessageReqData){
-        const res = await this.postapi(data,Endpoint.PrivateMessage.Create);
+        const res = await this.postapi(Endpoint.PrivateMessage.Create,data);
         return res?.data as SendPrivateMessageRespData|undefined;
     }
+
     /**发送频道消息 */
     async sendChannelMsg(data:SendGroupMessageReqData){
-        const res = await this.postapi(data,Endpoint.GroupMessage.Create);
+        const res = await this.postapi(Endpoint.GroupMessage.Create,data);
         return res?.data as SendPrivateMessageRespData|undefined;
+    }
+
+    /**获取自身数据 */
+    async getSelfData(){
+        const res = await this.getapi(Endpoint.User.Me);
+        return res?.data as JObject|undefined;
     }
 }

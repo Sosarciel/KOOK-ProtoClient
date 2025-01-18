@@ -3,6 +3,7 @@ import { WsConnectManager } from './WsConnectManager';
 import { AnySignaling } from './Signaling';
 import { EventName, EventMap } from '../Event/EventTable';
 import { PrivateMessageEventData } from '../Event/Message';
+import { KookAPISender } from '../Api/Sender';
 
 /** 事件监听 */
 export type ListenerEvent<E extends AnyFunc> = {
@@ -32,6 +33,7 @@ type RegEventOpt = Partial<{
 /**websocket客户端 */
 export class WebsocketClient {
     connectManager:WsConnectManager;
+    apiSender:KookAPISender;
     constructor(private token: string) {
         const client = this;
         this.connectManager = new WsConnectManager(token, {
@@ -41,6 +43,7 @@ export class WebsocketClient {
             onreset: () => { },
             onclose: () => { },
         });
+        this.apiSender = new KookAPISender(token);
     }
     start(){
         this.connectManager.start();
@@ -64,6 +67,11 @@ export class WebsocketClient {
             }
             case "PERSON":{
                 this.invokeEvent('PrivateMessage',eventdata);
+
+                this.apiSender.sendPrivateMsg({
+                    target_id:eventdata.author_id,
+                    content:eventdata.content,
+                });
                 break;
             }
             default:{
