@@ -1,4 +1,4 @@
-import { GetReqData, JObject, UtilCom } from "@zwa73/utils";
+import { JObject, QueryRequestData, UtilHttp } from "@zwa73/utils";
 import { postFormData } from "./Common";
 import { getAuthorization, KookBaseUrl } from "../Define";
 import { SendGroupMessageReqData, SendPrivateMessageReqData, SendPrivateMessageRespData, UploadMediaRespData } from "./RequestInterface";
@@ -10,7 +10,7 @@ export class KookAPISender{
     constructor(private token:string){}
 
     private async postapi(url:string,obj?:JObject){
-        return UtilCom.httpsPost({
+        return UtilHttp.httpPostJson().finalize({
             hostname:KookBaseUrl,
             port:443,
             path:url,
@@ -18,10 +18,10 @@ export class KookAPISender{
                 "Content-Type":"application/json",
                 "Authorization":getAuthorization('Bot',this.token),
             }
-        },obj);
+        }).once(obj);
     }
-    private async getapi(url:string,obj?:GetReqData){
-        return UtilCom.httpsGet({
+    private async getapi(url:string,obj?:QueryRequestData){
+        return UtilHttp.httpsGetJson().sendQuery().finalize({
             hostname:KookBaseUrl,
             path:url,
             port:443,
@@ -29,7 +29,7 @@ export class KookAPISender{
                 "Content-Type":"application/json",
                 "Authorization":`Bearer ${this.token}`,
             }
-        },obj);
+        }).once(obj??{});
     }
 
     /**上传媒体文件 */

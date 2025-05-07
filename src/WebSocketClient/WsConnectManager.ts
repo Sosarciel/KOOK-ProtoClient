@@ -1,8 +1,8 @@
-import { Failed, sleep, SLogger, Success, Terminated, Timeout, UtilCom, UtilFunc } from "@zwa73/utils";
+import { Failed, match, sleep, SLogger, Success, Terminated, Timeout, UtilFunc, UtilHttp } from "@zwa73/utils";
 import { AnySignaling, SignalingPing } from "./Signaling";
 import { WebSocket } from "ws";
 import { KookBaseUrl, getAuthorization } from "@/src/Define";
-import { Endpoint, EndpointBuilder } from "@/src/Endpoint";
+import { Endpoint } from "@/src/Endpoint";
 import { GatewayResp } from "@/src/Resp";
 import qs from 'querystring';
 
@@ -99,7 +99,7 @@ export class WsConnectManager{
     private session_id?:string;
 
     async procStatus(){
-        return await UtilFunc.matchProc(this.currStatus,{
+        return await match(this.currStatus,{
             GetGateway      :()=>this.ProcGetGateway(),
             ConnectGateway  :()=>this.ProcConnectGateway(),
             Reconnect       :()=>this.ProcReconnect(),
@@ -151,7 +151,7 @@ export class WsConnectManager{
             },
         };
         console.log(opt.path)
-        const result = (await UtilCom.httpsGet(opt,{
+        const result = (await UtilHttp.httpsGetJson().sendQuery().finalize(opt).once({
             compress:0,
         }))?.data as GatewayResp;
         //console.log(result);
@@ -173,7 +173,7 @@ export class WsConnectManager{
             (v)=>v==Success,
         );
 
-        return UtilFunc.matchProc(result, {
+        return match(result, {
             [Terminated]():Status{
                 SLogger.warn(`连接网关失败 重试到极限 回退至 GetGateway`);
                 return "GetGateway";
@@ -237,7 +237,7 @@ export class WsConnectManager{
             (v)=>v==Success,
         );
 
-        return UtilFunc.matchProc(result, {
+        return match(result, {
             [Terminated]():Status{
                 SLogger.warn(`重连失败 重试到极限 回退至 GetGateway`);
                 return "GetGateway";
@@ -258,7 +258,7 @@ export class WsConnectManager{
     //#region AwaitHello
     async ProcAwaitHello():Promise<Status>{
         const result = await this.awaitHello();
-        return UtilFunc.matchProc(result, {
+        return match(result, {
             [Timeout]():Status{
                 SLogger.warn(`等待hello包失败 超时 回退至 GetGateway`);
                 return "GetGateway";
@@ -324,7 +324,7 @@ export class WsConnectManager{
         if(ws==null) return "GetGateway";
 
         const result = await this.heartbeat();
-        return UtilFunc.matchProc(result, {
+        return match(result, {
             [Timeout]():Status{
                 SLogger.warn(`心跳超时 回退至 Reconnect`);
                 return "Reconnect";
@@ -351,7 +351,7 @@ export class WsConnectManager{
                 client.checkHeartbeat.bind(this),
                 (v)=>v==Success
             );
-            UtilFunc.matchProc(result,{
+            match(result,{
                 [Timeout](){
                     SLogger.warn(`检查心跳失败 超时`);
                     if(bkres) bkres(Timeout);

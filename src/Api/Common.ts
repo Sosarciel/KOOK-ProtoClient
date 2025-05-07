@@ -1,17 +1,16 @@
 import fs from 'fs';
 import FormData from 'form-data';
-import https from 'https';
 import { getAuthorization, KookBaseUrl } from '@/src/Define';
 import { Endpoint } from '@/src/Endpoint';
-import { ComReqOpt, SLogger, UtilCom } from '@zwa73/utils';
+import { RequestOption, SLogger, UtilHttp } from '@zwa73/utils';
 import { UploadMediaRespData } from './RequestInterface';
 
 export async function postFormData(filepath:string,token:string){
 
     const form = new FormData();
     form.append('file', fs.createReadStream(filepath));
-    const opt:ComReqOpt = {
-        protocol:'https',
+    const opt:RequestOption = {
+        protocol:'https:',
         hostname: KookBaseUrl,
         port: 443,
         path: Endpoint.UploadMedia,
@@ -21,15 +20,11 @@ export async function postFormData(filepath:string,token:string){
             ...form.getHeaders()
         }
     }
-    const out = await UtilCom.comReq(opt,
-        (req)=>void form.pipe(req),
-        (acc,data)=>acc+data,
-        ""
-    );
+    const out = await UtilHttp.https().sendFormData().acceptJson().finalize(opt).once(form);
     if(out==undefined) return undefined;
     if(out.data=="") return undefined;
     try{
-        const data = JSON.parse(out.data) as UploadMediaRespData;
+        const data = out.data as UploadMediaRespData;
         return {
             ...out,
             data
