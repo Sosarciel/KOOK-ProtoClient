@@ -199,7 +199,7 @@ export class WsConnectManager{
             ws.off('error', onError);
             openRes(Success);
         }
-        const onError = (reslove:(v:Failed )=>void)=>{
+        const onError = (resolve:(v:Failed )=>void)=>{
             ws.off('open', onOpen);
             errRes(Failed);
         }
@@ -342,7 +342,7 @@ export class WsConnectManager{
     async heartbeat(){
         SLogger.info(`正在维持心跳`);
         let bkres:((v:Failed|Timeout|Terminated)=>void)|null= null;
-        const bkpromis = new Promise<Failed|Timeout|Terminated>((reslove,reject)=>bkres = reslove);
+        const bkpromis = new Promise<Failed|Timeout|Terminated>((resolve,reject)=>bkres = resolve);
 
         const client = this;
         this.heartbeatEvent = setInterval(async ()=>{
